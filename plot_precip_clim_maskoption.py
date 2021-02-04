@@ -1,3 +1,5 @@
+# code for doing lots of stuff, has functions (w def), cartopy map plotter, a debug statement, assertions, 
+
 import argparse
 
 import xarray as xr
@@ -5,7 +7,7 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import numpy as np
 import cmocean
-
+import pdb  #debugger import statement
 
 def apply_mask(darray, sftlf_file, realm):
     """Mask ocean or land using a sftlf (land surface fraction) file.
@@ -19,6 +21,14 @@ def apply_mask(darray, sftlf_file, realm):
   
     dset = xr.open_dataset(sftlf_file)
   
+    # running debugging, Les 8 (commenting out below line bc don't normally want to go line-by-line
+    #pdb.set_trace()  
+    # will run line-by-line from here on, with ability to change variables, e.g. realm = 'land'
+    # to continue to next line, type "n", to quit, type "c"
+
+    # adding an assertion, that realm be only one of the following list: (Les 8)
+    assert realm in ['land', 'ocean'], """Valid realms are 'land' or 'ocean'"""
+    
     if realm == 'land':
         masked_darray = darray.where(dset['sftlf'].data < 50)
     else:
@@ -57,10 +67,13 @@ def create_plot(clim, model_name, season, gridlines=False):
         
     fig = plt.figure(figsize=[12,5])
     ax = fig.add_subplot(111, projection=ccrs.PlateCarree(central_longitude=180))
+    #FOR SOME REASON OTHER PROJECTIONS (Robinson, Mollweide) DON'T WORK ?!?!? BELOW:
+    #ax = fig.add_subplot(111, projection=ccrs.Mollweide(central_longitude=180))
     clim.sel(season=season).plot.contourf(ax=ax,
                                           levels=np.arange(0, 13.5, 1.5),
                                           extend='max',
                                           transform=ccrs.PlateCarree(),
+                                          #transform=ccrs.Mollweide(),
                                           cbar_kwargs={'label': clim.units},
                                           cmap=cmocean.cm.haline_r)
     ax.coastlines()
